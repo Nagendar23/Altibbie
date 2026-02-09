@@ -213,7 +213,7 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
                   )}
 
                   {(item.tags && item.tags.length > 0) && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {item.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
@@ -230,14 +230,16 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
                     </div>
                   )}
 
-                  {/* Click indicator */}
-                  <div className="mt-4 pt-3 border-t border-white/50 flex items-center justify-center text-xs text-slate-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span>Click to view details</span>
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  {/* View Details Button */}
+                  <button
+                    onClick={() => setSelectedItem(item)}
+                    className="w-full mt-4 pt-4 border-t border-white/30 text-blue-600 hover:text-blue-700 font-semibold text-sm py-2 hover:bg-white/10 rounded-b-lg transition-all flex items-center justify-center gap-2 group"
+                  >
+                    <span>View Full Details</span>
+                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                  </div>
+                  </button>
                 </div>
               </motion.div>
             );
