@@ -5,9 +5,11 @@ import publicRoutes from "./routes/publicRoute.js";
 
 const app = express();
 
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+
 // CORS configuration
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:8000'],
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type'],
   credentials: true
