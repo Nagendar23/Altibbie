@@ -1,28 +1,53 @@
-import KnowledgeList from "./knowledgeList"
+"use client";
 
-async function getKnowledge() {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
-      { cache: "no-store" }
-    );
-    
-    if (!res.ok) {
-      console.error('Failed to fetch knowledge items');
-      return { items: [] };
-    }
+import { useEffect, useState } from "react";
+import KnowledgeList from "./knowledgeList";
 
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching knowledge:', error);
-    return { items: [] };
-  }
-}
+type KnowledgeItem = {
+  _id: string;
+  title: string;
+  content: string;
+  type: "note" | "link" | "insight";
+  tags?: string[];
+  createdAt?: string;
+  ai?: {
+    summary?: string;
+  };
+};
 
-export default async function DashboardPage() {
-  const data = await getKnowledge();
-  const items = data.items || [];
+export default function DashboardPage() {
+  const [items, setItems] = useState<KnowledgeItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchKnowledge = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
+          { cache: "no-store" }
+        );
+        
+        if (!res.ok) {
+          setError('Failed to fetch knowledge items');
+          setItems([]);
+          return;
+        }
+
+        const data = await res.json();
+        setItems(data.items || []);
+      } catch (err) {
+        console.error('Error fetching knowledge:', err);
+        setError('Error loading knowledge. Please refresh.');
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchKnowledge();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
@@ -36,7 +61,22 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <KnowledgeList items={items} />
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+            <p className="mt-4 text-slate-600">Loading your knowledge...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
+
+        {!loading && <KnowledgeList items={items} />}
       </div>
     </div>
   );
