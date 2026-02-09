@@ -17,8 +17,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/knowledge',routes);
+app.use('/api/knowledge', routes);
 app.use('/api/public',publicRoutes);
 
 app.get('/health',(_,res)=>{

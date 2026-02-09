@@ -52,11 +52,10 @@ export const getKnowledgeItemById = async(req,res)=>{
     try{
         const item = await KnowledgeItem.findById(req.params.id);
         if(!item){
-            return res.status(400).json({error:"Item not found"});
-
+            return res.status(404).json({error:"Item not found"});
         }
-        res.json(item)
-                console.log('item fetched successfully',item)
+        res.status(200).json(item);
+        console.log('item fetched successfully',item);
 
     }catch(err){
         res.status(500).json({error:err.message})

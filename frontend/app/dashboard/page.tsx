@@ -26,7 +26,7 @@ export default function DashboardPage() {
         setLoading(true);
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
-          { cache: "no-store" }
+          { cache: "no-store", credentials: "include" }
         );
         
         if (!res.ok) {

@@ -28,6 +28,7 @@ export default function CapturePage(){
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
+                credentials: "include",
                 body:JSON.stringify({
                     title:form.title,
                     content:form.content,
