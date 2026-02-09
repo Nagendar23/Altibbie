@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import routes from "./routes/knowledgeRoute.js";
+import publicRoutes from "./routes/publicRoute.js";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/knowledge',routes);
+app.use('/api/public',publicRoutes);
 
 app.get('/health',(_,res)=>{
     res.json({status:"OK"});

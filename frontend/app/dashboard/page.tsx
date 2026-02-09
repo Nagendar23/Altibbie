@@ -1,22 +1,43 @@
 import KnowledgeList from "./knowledgeList"
 
 async function getKnowledge() {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
-    { cache: "no-store" }
-  );
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
+      { cache: "no-store" }
+    );
+    
+    if (!res.ok) {
+      console.error('Failed to fetch knowledge items');
+      return { items: [] };
+    }
 
-  return res.json();
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching knowledge:', error);
+    return { items: [] };
+  }
 }
 
 export default async function DashboardPage() {
-  const items = await getKnowledge();
+  const data = await getKnowledge();
+  const items = data.items || [];
 
   return (
-    <div className="max-w-5xl mx-auto py-12">
-      <h1 className="text-2xl font-semibold mb-6">Your Second Brain</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <div className="max-w-7xl mx-auto py-12 px-6">
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+            Your Second Brain
+          </h1>
+          <p className="text-xl text-slate-600">
+            Explore your collection of knowledge, insights, and saved links
+          </p>
+        </div>
 
-      <KnowledgeList items={items} />
+        <KnowledgeList items={items} />
+      </div>
     </div>
   );
 }

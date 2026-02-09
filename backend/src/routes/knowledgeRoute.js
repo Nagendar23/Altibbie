@@ -4,11 +4,13 @@ import {
     getAllKnowledgeItems,
     getKnowledgeItemById
 } from '../controller/knowledgeController.js';
+import { knowledgeQuery } from '../controller/queryController.js';
     
 const router = express.Router();
 
 router.post('/',createKnowledgeItem);
 router.get('/',getAllKnowledgeItems);
+router.post('/query', knowledgeQuery);
 
 router.get("/_ai-test", async (_, res) => {
   try {
