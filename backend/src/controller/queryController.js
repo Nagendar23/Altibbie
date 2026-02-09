@@ -1,4 +1,4 @@
-import KnowledgeItem from "../models/KnowledgeItem.js";
+import KnowledgeItem from "../models/knowledgeItem.js";
 import { queryKnowledge, findRelevantKnowledge } from "../services/queryService.js";
 
 /**
