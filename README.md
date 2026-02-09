@@ -301,18 +301,5 @@ const result = await queryKnowledge(question, relevantItems);
 - **API Reference**: See API section above
 - **Design Principles**: Documented in /docs page
 
-## 🤝 Contributing
 
-This is a technical assessment project for Altibbe. Not currently accepting contributions.
 
-## 📝 License
-
-MIT
-
-## 🙏 Acknowledgments
-
-Built as part of the Altibbe Engineering Assessment by Nagendar23
-
----
-
-**Made with 🧠 and ❤️ | Powered by AI**
