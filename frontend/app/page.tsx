@@ -48,8 +48,67 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
+        className="relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 20%, #312e81 40%, #5b21b6 60%, #7c3aed 80%, #ec4899 100%)',
+        }}
       >
+        {/* Smooth mesh background */}
+        <div className="absolute inset-0">
+          <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+            <defs>
+              <filter id="blur">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="40" />
+              </filter>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#00d4ff', stopOpacity: 0.15 }} />
+                <stop offset="100%" style={{ stopColor: '#ec4899', stopOpacity: 0.1 }} />
+              </linearGradient>
+            </defs>
+            <rect width="1200" height="800" fill="url(#grad1)" filter="url(#blur)" />
+          </svg>
+        </div>
+
+        {/* Floating animated shapes */}
+        <motion.div
+          animate={{
+            y: [0, 30, 0],
+            x: [0, 20, 0],
+            rotate: [0, 180, 360],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full blur-3xl opacity-40 pointer-events-none"
+        />
+        <motion.div
+          animate={{
+            y: [0, -40, 0],
+            x: [0, -30, 0],
+            rotate: [360, 180, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-violet-500 to-purple-500 rounded-full blur-3xl opacity-35 pointer-events-none"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 180],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute top-1/3 right-1/3 w-64 h-64 bg-gradient-to-bl from-pink-400 to-rose-500 rounded-full blur-3xl opacity-30 pointer-events-none"
+        />
+
         <div className="max-w-6xl mx-auto px-6 py-24 md:py-40 relative z-10">
           <motion.div
             initial={{ y: 30, opacity: 0 }}
@@ -63,67 +122,78 @@ export default function Home() {
               transition={{ delay: 0.1, duration: 0.6 }}
               className="inline-block mb-6"
             >
-              <span className="bg-blue-500/20 text-blue-200 px-4 py-2 rounded-full text-sm font-medium border border-blue-400/30">
+              <span className="relative inline-flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-full text-sm font-semibold border border-white/30 backdrop-blur-xl hover:bg-white/20 transition-all">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-300"></span>
+                </span>
                 ✨ AI-Powered Knowledge Management
               </span>
             </motion.div>
 
-            <h1 className="text-5xl md:text-7xl font-black mb-6 text-white leading-tight">
-              Your Second Brain Awaits
+            <h1 className="text-6xl md:text-8xl font-black mb-6 text-white leading-tight tracking-tighter">
+              <motion.span 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="block"
+              >
+                Your Second
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
+                className="block bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 bg-clip-text text-transparent"
+              >
+                Brain Awaits
+              </motion.span>
             </h1>
             
-            <p className="text-lg md:text-xl text-blue-100/80 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Capture intelligent. Organize seamlessly. Discover instantly. Transform your scattered thoughts into structured, searchable knowledge with AI.
-            </p>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="text-lg md:text-xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed font-medium"
+            >
+              Capture intelligent. Organize seamlessly. Discover instantly. 
+              <br className="hidden md:block" />
+              <span className="text-transparent bg-gradient-to-r from-cyan-300 to-pink-300 bg-clip-text">
+                Transform scattered thoughts into structured, searchable knowledge with AI.
+              </span>
+            </motion.p>
 
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
               <Link 
                 href="/capture" 
-                className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-bold text-lg overflow-hidden transition-all hover:scale-105 hover:shadow-2xl shadow-lg"
+                className="group relative px-8 py-4 bg-white text-black rounded-xl font-bold text-lg overflow-hidden transition-all hover:scale-110 hover:shadow-2xl shadow-2xl hover:shadow-white/50"
               >
-                <span className="relative z-10">Start Capturing →</span>
+                <span className="relative z-10 flex items-center gap-2">
+                  Start Capturing
+                  <motion.span
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    →
+                  </motion.span>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-pink-300 opacity-0 group-hover:opacity-100 transition-opacity" />
               </Link>
 
               <Link 
                 href="/dashboard" 
-                className="px-8 py-4 border-2 border-blue-300/50 text-white rounded-lg font-semibold text-lg hover:bg-white/10 hover:border-blue-300 transition-all hover:scale-105 backdrop-blur-sm"
+                className="group relative px-8 py-4 border-2 border-white/40 text-white rounded-xl font-bold text-lg hover:bg-white/10 hover:border-white/80 transition-all hover:scale-105 backdrop-blur-xl hover:shadow-xl"
               >
-                View Dashboard
+                <span className="relative z-10">View Dashboard</span>
               </Link>
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Animated Background Elements */}
-        <motion.div
-          style={{ y: y1, opacity }}
-          animate={{
-            rotate: [0, 5, 0],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-20 right-10 w-72 h-72 bg-cyan-500 rounded-full blur-3xl opacity-20 pointer-events-none"
-        />
-        <motion.div
-          style={{ y: y2, opacity }}
-          animate={{
-            rotate: [0, -5, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute bottom-20 left-10 w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-10 pointer-events-none"
-        />
       </motion.section>
 
       {/* Stats Section */}

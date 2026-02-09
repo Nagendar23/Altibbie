@@ -130,7 +130,7 @@ export default function QueryPage() {
           {/* Example Questions */}
           <div className="mb-8">
             <p className="text-sm font-medium text-slate-700 mb-3">Try these examples:</p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 text-gray-800">
               {exampleQuestions.map((q) => (
                 <button
                   key={q}

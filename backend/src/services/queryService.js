@@ -1,14 +1,12 @@
-import OpenAI from 'openai';
+import { HfInference } from '@huggingface/inference';
 
-let openai = null;
+let hfClient = null;
 
-const getOpenAIClient = () => {
-  if (!openai) {
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+const getHuggingFaceClient = () => {
+  if (!hfClient) {
+    hfClient = new HfInference(process.env.HUGGING_API_KEY);
   }
-  return openai;
+  return hfClient;
 };
 
 /**
@@ -23,9 +21,7 @@ export const queryKnowledge = async (question, knowledgeItems) => {
     })
     .join('\n\n---\n\n');
 
-  const prompt = `You are an AI assistant helping to query a personal knowledge base.
-Based on the following knowledge items, answer the user's question.
-Cite specific knowledge items by their number [1], [2], etc. when relevant.
+  const prompt = `You are an AI assistant helping to query a personal knowledge base. Based on the following knowledge items, answer the user's question. Cite specific knowledge items by their number [1], [2], etc. when relevant.
 
 KNOWLEDGE BASE:
 ${context}
@@ -33,26 +29,44 @@ ${context}
 USER QUESTION:
 ${question}
 
-Provide a clear, concise answer based on the knowledge base. If the knowledge base doesn't contain relevant information, say so.`;
+Provide a clear, concise answer based on the knowledge base. If the knowledge base doesn't contain relevant information, say so.
 
-  const client = getOpenAIClient();
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a helpful AI assistant for querying a personal knowledge base." },
-      { role: "user", content: prompt }
-    ],
-    temperature: 0.7,
-  });
+ANSWER:`;
 
-  return {
-    answer: response.choices[0].message.content.trim(),
-    sources: knowledgeItems.map(item => ({
-      id: item._id,
-      title: item.title,
-      type: item.type,
-    })),
-  };
+  const client = getHuggingFaceClient();
+  
+  try {
+    const response = await client.textGeneration({
+      model: 'mistralai/Mistral-7B-Instruct-v0.2',
+      inputs: prompt,
+      parameters: {
+        max_new_tokens: 300,
+        temperature: 0.7,
+        top_p: 0.95,
+        return_full_text: false,
+      }
+    });
+
+    return {
+      answer: response.generated_text.trim(),
+      sources: knowledgeItems.map(item => ({
+        id: item._id,
+        title: item.title,
+        type: item.type,
+      })),
+    };
+  } catch (error) {
+    console.error('Hugging Face query error:', error);
+    // Fallback response
+    return {
+      answer: "I found relevant knowledge items but couldn't generate a detailed answer. Please review the sources below.",
+      sources: knowledgeItems.map(item => ({
+        id: item._id,
+        title: item.title,
+        type: item.type,
+      })),
+    };
+  }
 };
 
 /**
