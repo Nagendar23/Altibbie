@@ -1,10 +1,15 @@
-import {GoogleGenerativeAI} from '@google/generative-ai';
+import OpenAI from 'openai';
 
-const genAI = new GoogleGenerativeAI(process.env.OPENAI_API_KEY);
+let openai = null;
 
-const model = genAI.getGenerativeModel({
-    model:"gemini-3-flash-preview",
-});
+const getOpenAIClient = () => {
+  if (!openai) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+};
 
 export const summarizeContent = async(content)=>{
     const prompt =`
@@ -13,8 +18,15 @@ Focus on the core idea. Avoid fluff.
 CONTENT:${content}
     ` ;
 
-const result = await model.generateContent(prompt);
-return result.response.text().trim();
+const client = getOpenAIClient();
+const message = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "user", content: prompt }
+  ],
+});
+
+return message.choices[0].message.content.trim();
 }
 
 export const generateTags = async (content) => {
@@ -26,9 +38,16 @@ CONTENT:
 ${content}
   `;
 
-  const result = await model.generateContent(prompt);
-  return result.response
-    .text()
+  const client = getOpenAIClient();
+  const message = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "user", content: prompt }
+    ],
+  });
+
+  const text = message.choices[0].message.content;
+  return text
     .split(",")
     .map((t) => t.trim().toLowerCase());
 };
