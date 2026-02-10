@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/capture", label: "Capture" },
-    { href: "/query", label: "AI Query" },
+    { href: "/dashboard", label: "Dashboard", protected: true },
+    { href: "/capture", label: "Capture", protected: true },
+    { href: "/query", label: "AI Query", protected: true },
     { href: "/docs", label: "Docs" },
   ];
 
@@ -25,6 +27,8 @@ export default function Navigation() {
 
           <div className="flex items-center gap-6">
             {navItems.map((item) => {
+              if (item.protected && !user) return null;
+
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -45,6 +49,35 @@ export default function Navigation() {
                 </Link>
               );
             })}
+
+            {user ? (
+              <div className="flex items-center gap-4 ml-4 pl-4 border-l border-slate-200">
+                <span className="text-sm font-semibold text-slate-700">
+                  {user.name}
+                </span>
+                <button
+                  onClick={logout}
+                  className="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-slate-200">
+                <Link
+                  href="/login"
+                  className="text-sm text-slate-600 hover:text-slate-900 font-medium px-4 py-2"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm shadow-blue-200"
+                >
+                  Get Started
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

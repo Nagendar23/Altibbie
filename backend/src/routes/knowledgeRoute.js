@@ -1,29 +1,24 @@
 import express from 'express';
-import { 
-    createKnowledgeItem,
-    getAllKnowledgeItems,
-    getKnowledgeItemById
+import {
+  createKnowledgeItem,
+  getAllKnowledgeItems,
+  getKnowledgeItemById,
+  deleteKnowledgeItem,
+  updateKnowledgeItem
 } from '../controller/knowledgeController.js';
 import { knowledgeQuery } from '../controller/queryController.js';
-    
+import { protect } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
-router.post('/',createKnowledgeItem);
-router.get('/',getAllKnowledgeItems);
+// All knowledge routes are protected
+router.use(protect);
+
+router.post('/', createKnowledgeItem);
+router.get('/', getAllKnowledgeItems);
 router.post('/query', knowledgeQuery);
-
-router.get("/_ai-test", async (_, res) => {
-  try {
-    const { summarizeContent } = await import("../services/geminiService.js");
-    const summary = await summarizeContent(
-      "Knowledge compounds when it is structured and revisited."
-    );
-    res.json({ summary });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-router.get('/:id',getKnowledgeItemById);
+router.get('/:id', getKnowledgeItemById);
+router.put('/:id', updateKnowledgeItem);
+router.delete('/:id', deleteKnowledgeItem);
 
 export default router;

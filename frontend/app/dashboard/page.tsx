@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import KnowledgeList from "./knowledgeList";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 type KnowledgeItem = {
   _id: string;
@@ -19,8 +21,18 @@ export default function DashboardPage() {
   const [items, setItems] = useState<KnowledgeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (!user) return;
+
     const fetchKnowledge = async () => {
       try {
         setLoading(true);
@@ -28,7 +40,7 @@ export default function DashboardPage() {
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
           { cache: "no-store", credentials: "include" }
         );
-        
+
         if (!res.ok) {
           setError('Failed to fetch knowledge items');
           setItems([]);
@@ -47,18 +59,36 @@ export default function DashboardPage() {
     };
 
     fetchKnowledge();
-  }, []);
+  }, [user]);
+
+  if (authLoading || (!user && loading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null; // Should redirect
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <div className="max-w-7xl mx-auto py-12 px-6">
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Your Second Brain
-          </h1>
-          <p className="text-xl text-slate-600">
-            Explore your collection of knowledge, insights, and saved links
-          </p>
+        <div className="mb-12 flex items-end justify-between">
+          <div>
+            <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+              {user.name}'s Brain
+            </h1>
+            <p className="text-xl text-slate-600">
+              Explore your collection of knowledge, insights, and saved links
+            </p>
+          </div>
+          <button
+            onClick={() => router.push('/capture')}
+            className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg shadow-blue-200 transition-all hover:-translate-y-1"
+          >
+            + Capture New
+          </button>
         </div>
 
         {loading && (

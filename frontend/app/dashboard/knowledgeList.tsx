@@ -24,10 +24,18 @@ type KnowledgeListProps = {
 /* ---------- Component ---------- */
 
 export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
+  // Local state for items to handle deletions immediately
+  const [localItems, setLocalItems] = useState<KnowledgeItem[]>(items);
   const [query, setQuery] = useState("");
   const [type, setType] = useState<"all" | KnowledgeItem["type"]>("all");
   const [sortBy, setSortBy] = useState<"date" | "title">("date");
   const [selectedItem, setSelectedItem] = useState<KnowledgeItem | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Sync props to state if props change (e.g. re-fetch)
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
 
   // Handle body scroll when modal is open
   useEffect(() => {
@@ -42,7 +50,33 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
     };
   }, [selectedItem]);
 
-  const safeItems = Array.isArray(items) ? items : [];
+  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+
+    if (!confirm("Are you sure you want to delete this item?")) return;
+
+    setDeletingId(id);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        setLocalItems(prev => prev.filter(item => item._id !== id));
+        if (selectedItem?._id === id) setSelectedItem(null);
+      } else {
+        alert("Failed to delete item");
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      alert("Error deleting item");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const safeItems = Array.isArray(localItems) ? localItems : [];
 
   const filtered = safeItems.filter((item) => {
     const matchesQuery =
@@ -99,7 +133,7 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
   return (
     <>
       {/* Controls */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8"
@@ -140,7 +174,7 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
         <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
           <span>Showing <strong>{sorted.length}</strong> of <strong>{safeItems.length}</strong> items</span>
           {(query || type !== 'all') && (
-             <span className="text-blue-600 font-medium">Filtered results</span>
+            <span className="text-blue-600 font-medium">Filtered results</span>
           )}
         </div>
       </motion.div>
@@ -150,7 +184,7 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sorted.map((item, index) => {
             const url = item.type === "link" ? extractUrl(item.content) : null;
-            
+
             return (
               <motion.div
                 key={item._id}
@@ -164,25 +198,42 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
               >
                 {/* Animated background effect */}
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-4xl transform group-hover:scale-110 transition-transform duration-300">
                       {typeIcons[item.type]}
                     </div>
                     <div className="flex flex-col items-end gap-2">
+                      {/* Delete Button (Card) */}
+                      <button
+                        onClick={(e) => handleDelete(item._id, e)}
+                        disabled={deletingId === item._id}
+                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors z-20"
+                        title="Delete item"
+                      >
+                        {deletingId === item._id ? (
+                          <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
                       <span className="text-xs font-bold px-3 py-1.5 bg-white/80 backdrop-blur-sm text-slate-700 rounded-full uppercase tracking-wider shadow-sm">
                         {item.type}
-                      </span>
-                      <span className="text-xs text-slate-500 font-medium">
-                        {formatDate(item.createdAt)}
                       </span>
                     </div>
                   </div>
 
-                  <h2 className="font-bold text-xl mb-3 text-slate-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
-                    {item.title}
-                  </h2>
+                  <div className="flex justify-between items-start mb-3">
+                    <h2 className="font-bold text-xl text-slate-900 line-clamp-2 group-hover:text-blue-700 transition-colors">
+                      {item.title}
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mb-3">
+                    {formatDate(item.createdAt)}
+                  </p>
 
                   {item.ai?.summary && (
                     <div className="mb-3 p-3 bg-white/60 backdrop-blur-sm rounded-lg border border-white/80">
@@ -233,7 +284,7 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
                   {/* View Details Button */}
                   <button
                     onClick={() => setSelectedItem(item)}
-                    className="w-full mt-4 pt-4 border-t border-white/30 text-blue-600 hover:text-blue-700 font-semibold text-sm py-2 hover:bg-white/10 rounded-b-lg transition-all flex items-center justify-center gap-2 group"
+                    className="w-full mt-4 pt-4 border-t border-white/30 text-blue-600 hover:text-blue-700 font-semibold text-sm py-2 hover:bg-white/10 rounded-b-lg transition-all flex items-center justify-center gap-2 group ml-0"
                   >
                     <span>View Full Details</span>
                     <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,117 +317,136 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
                 onClick={(e) => e.stopPropagation()}
                 className={`bg-gradient-to-br ${typeGradients[selectedItem.type]} rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border-2 ${typeBorders[selectedItem.type]}`}
               >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-slate-200 p-6 flex items-start justify-between z-10">
-                <div className="flex items-center gap-4 flex-1">
-                  <span className="text-5xl">{typeIcons[selectedItem.type]}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-xs font-bold px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full uppercase tracking-wider">
-                        {selectedItem.type}
-                      </span>
-                      <span className="text-sm text-slate-500 font-medium">
-                        {formatDate(selectedItem.createdAt)}
-                      </span>
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-slate-200 p-6 flex items-start justify-between z-10">
+                  <div className="flex items-center gap-4 flex-1">
+                    <span className="text-5xl">{typeIcons[selectedItem.type]}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-xs font-bold px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full uppercase tracking-wider">
+                          {selectedItem.type}
+                        </span>
+                        <span className="text-sm text-slate-500 font-medium">
+                          {formatDate(selectedItem.createdAt)}
+                        </span>
+                      </div>
+                      <h2 className="text-3xl font-bold text-slate-900">
+                        {selectedItem.title}
+                      </h2>
                     </div>
-                    <h2 className="text-3xl font-bold text-slate-900">
-                      {selectedItem.title}
-                    </h2>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDelete(selectedItem._id)}
+                      disabled={deletingId === selectedItem._id}
+                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors flex items-center gap-1"
+                    >
+                      {deletingId === selectedItem._id ? (
+                        <div className="animate-spin h-5 w-5 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="text-sm font-medium">Delete</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setSelectedItem(null)}
+                      className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-full"
+                      aria-label="Close modal"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => setSelectedItem(null)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-full"
-                  aria-label="Close modal"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
 
-              {/* Modal Content */}
-              <div className="p-6 space-y-6">
-                {/* AI Summary */}
-                {selectedItem.ai?.summary && (
-                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-5 border-2 border-purple-200">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">🤖</span>
-                      <h3 className="text-lg font-bold text-purple-900">AI-Generated Summary</h3>
+                {/* Modal Content */}
+                <div className="p-6 space-y-6">
+                  {/* AI Summary */}
+                  {selectedItem.ai?.summary && (
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-5 border-2 border-purple-200">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">🤖</span>
+                        <h3 className="text-lg font-bold text-purple-900">AI-Generated Summary</h3>
+                      </div>
+                      <p className="text-slate-700 leading-relaxed">
+                        {selectedItem.ai.summary}
+                      </p>
                     </div>
-                    <p className="text-slate-700 leading-relaxed">
-                      {selectedItem.ai.summary}
+                  )}
+
+                  {/* Full Content */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">Full Content</h3>
+                    <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                      {selectedItem.content}
                     </p>
                   </div>
-                )}
 
-                {/* Full Content */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">Full Content</h3>
-                  <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                    {selectedItem.content}
-                  </p>
-                </div>
+                  {/* Link for link type */}
+                  {selectedItem.type === "link" && extractUrl(selectedItem.content) && (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border-2 border-blue-200">
+                      <h3 className="text-lg font-bold text-slate-900 mb-3">🔗 Link</h3>
+                      <a
+                        href={extractUrl(selectedItem.content)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 font-semibold break-all hover:underline inline-flex items-center gap-2 group"
+                      >
+                        <span>{extractUrl(selectedItem.content)}</span>
+                        <svg className="w-5 h-5 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
+                  )}
 
-                {/* Link for link type */}
-                {selectedItem.type === "link" && extractUrl(selectedItem.content) && (
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-5 border-2 border-blue-200">
-                    <h3 className="text-lg font-bold text-slate-900 mb-3">🔗 Link</h3>
-                    <a
-                      href={extractUrl(selectedItem.content)!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700 font-semibold break-all hover:underline inline-flex items-center gap-2 group"
-                    >
-                      <span>{extractUrl(selectedItem.content)}</span>
-                      <svg className="w-5 h-5 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </div>
-                )}
+                  {/* Tags */}
+                  {selectedItem.tags && selectedItem.tags.length > 0 && (
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200">
+                      <h3 className="text-lg font-bold text-slate-900 mb-3">🏷️ Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedItem.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-sm bg-gradient-to-r from-blue-100 to-purple-100 text-slate-700 px-4 py-2 rounded-full font-medium border border-blue-200 shadow-sm"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Tags */}
-                {selectedItem.tags && selectedItem.tags.length > 0 && (
-                  <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200">
-                    <h3 className="text-lg font-bold text-slate-900 mb-3">🏷️ Tags</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedItem.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-sm bg-gradient-to-r from-blue-100 to-purple-100 text-slate-700 px-4 py-2 rounded-full font-medium border border-blue-200 shadow-sm"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Metadata */}
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">📊 Metadata</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-slate-500 font-medium">Type:</span>
-                      <span className="ml-2 text-slate-900 font-semibold capitalize">{selectedItem.type}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 font-medium">Created:</span>
-                      <span className="ml-2 text-slate-900 font-semibold">{formatDate(selectedItem.createdAt)}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 font-medium">ID:</span>
-                      <span className="ml-2 text-slate-900 font-mono text-xs">{selectedItem._id}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 font-medium">Tags:</span>
-                      <span className="ml-2 text-slate-900 font-semibold">{selectedItem.tags?.length || 0}</span>
+                  {/* Metadata */}
+                  <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 mb-3">📊 Metadata</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-slate-500 font-medium">Type:</span>
+                        <span className="ml-2 text-slate-900 font-semibold capitalize">{selectedItem.type}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium">Created:</span>
+                        <span className="ml-2 text-slate-900 font-semibold">{formatDate(selectedItem.createdAt)}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium">ID:</span>
+                        <span className="ml-2 text-slate-900 font-mono text-xs">{selectedItem._id}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 font-medium">Tags:</span>
+                        <span className="ml-2 text-slate-900 font-semibold">{selectedItem.tags?.length || 0}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
             </motion.div>
           </>
         )}
@@ -391,8 +461,8 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
           <div className="text-6xl mb-4">🔍</div>
           <p className="text-xl text-slate-500 mb-2">No knowledge found</p>
           <p className="text-slate-400">
-            {query || type !== "all" 
-              ? "Try adjusting your filters" 
+            {query || type !== "all"
+              ? "Try adjusting your filters"
               : "Start capturing your thoughts and ideas"}
           </p>
         </motion.div>

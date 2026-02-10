@@ -25,7 +25,7 @@ export default function QueryPage() {
 
   const handleQuery = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!question.trim()) return;
 
     setLoading(true);
@@ -38,6 +38,7 @@ export default function QueryPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ question }),
         }
       );
@@ -88,7 +89,7 @@ export default function QueryPage() {
                 className="w-full bg-slate-50 border-0 rounded-xl px-6 py-4 text-lg text-slate-900 placeholder:text-slate-400 focus:bg-white focus:ring-0 transition-colors resize-none"
                 disabled={loading}
               />
-              
+
               <div className="flex items-center justify-between px-6 pb-4 bg-white rounded-b-xl border-t border-slate-100 mt-2 pt-3">
                 <div className="text-sm text-slate-400 font-medium">
                   Try asking about your notes, links, or insights

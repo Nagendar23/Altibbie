@@ -1,61 +1,86 @@
 "use client";
 
-import {useState} from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
-export default function CapturePage(){
-    const [form, setForm] = useState({
-        title:"",
-        content:"",
-        type:"note",
-        tags:"",
-    });
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState("");
+export default function CapturePage() {
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+    type: "note",
+    tags: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
 
-    const handleChange = (e:any)=>{
-        setForm({...form, [e.target.name]: e.target.value});
-    };
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, authLoading, router]);
 
-    const handleSubmit = async(e:any)=>{
-        e.preventDefault();
-        setLoading(true);
-        setSuccess(false);
-        setError("");
+  const handleChange = (e: any) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                credentials: "include",
-                body:JSON.stringify({
-                    title:form.title,
-                    content:form.content,
-                    type:form.type,
-                    tags:form.tags.split(",").map((t)=> t.trim()).filter(Boolean),
-                }),
-            });
-            
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-            
-            setSuccess(true);
-            setForm({ title: "", content: "", type: "note", tags: "" });
-            
-            // Auto-hide success message after 5 seconds
-            setTimeout(() => setSuccess(false), 5000);
-        } catch (error) {
-            console.error('Error saving knowledge:', error);
-            setError('Failed to save knowledge. Please try again.');
-        } finally {
-            setLoading(false);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+    setError("");
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            title: form.title,
+            content: form.content,
+            type: form.type,
+            tags: form.tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean),
+          }),
         }
+      );
 
-    };
-    
-    return(
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      setSuccess(true);
+      setForm({ title: "", content: "", type: "note", tags: "" });
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (error) {
+      console.error("Error saving knowledge:", error);
+      setError("Failed to save knowledge. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authLoading || (!user && loading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12">
       <div className="max-w-3xl mx-auto px-6">
         <motion.div
@@ -67,11 +92,12 @@ export default function CapturePage(){
             Capture Knowledge
           </h1>
           <p className="text-xl text-slate-600 mb-8">
-            Save your thoughts, links, and insights. AI will process them automatically.
+            Save your thoughts, links, and insights. AI will process them
+            automatically.
           </p>
 
-          <motion.form 
-            onSubmit={handleSubmit} 
+          <motion.form
+            onSubmit={handleSubmit}
             className="bg-white rounded-2xl shadow-xl p-8 space-y-6"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -185,7 +211,8 @@ export default function CapturePage(){
                     Knowledge saved successfully!
                   </p>
                   <p className="text-green-600 text-sm">
-                    AI is processing in the background to summarize and tag your content.
+                    AI is processing in the background to summarize and tag your
+                    content.
                   </p>
                 </div>
               </motion.div>
@@ -204,6 +231,6 @@ export default function CapturePage(){
           </motion.form>
         </motion.div>
       </div>
-    </div>       
-    )
+    </div>
+  );
 }
