@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
@@ -42,61 +43,60 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-                <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-slate-900">
-                        Create your account
+        <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50">
+            {/* Background Blobs */}
+            <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-cyan-400/20 rounded-full blur-3xl" />
+            <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-blue-500/20 rounded-full blur-3xl" />
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="max-w-md w-full bg-white/80 backdrop-blur-xl p-10 rounded-3xl relative z-10 shadow-2xl border border-white/50"
+            >
+                <div className="text-center mb-10">
+                    <h2 className="text-3xl font-bold text-slate-900">
+                        Join the Future
                     </h2>
-                    <p className="mt-2 text-sm text-slate-600">
-                        Start organizing your knowledge today
+                    <p className="mt-2 text-slate-500 font-medium">
+                        Start building your knowledge engine.
                     </p>
                 </div>
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="rounded-md shadow-sm space-y-4">
+
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                    <div className="space-y-4">
                         <div>
-                            <label htmlFor="name" className="sr-only">
-                                Full Name
-                            </label>
+                            <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Full Name</label>
                             <input
                                 id="name"
-                                name="name"
                                 type="text"
                                 required
-                                className="appearance-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Full Name"
+                                className="input-field w-full"
+                                placeholder="Ada Lovelace"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="email-address" className="sr-only">
-                                Email address
-                            </label>
+                            <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Email</label>
                             <input
-                                id="email-address"
-                                name="email"
+                                id="email"
                                 type="email"
-                                autoComplete="email"
                                 required
-                                className="appearance-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
+                                className="input-field w-full"
+                                placeholder="ada@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="sr-only">
-                                Password
-                            </label>
+                            <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Password</label>
                             <input
                                 id="password"
-                                name="password"
                                 type="password"
-                                autoComplete="new-password"
                                 required
-                                className="appearance-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Password (min. 6 chars)"
+                                className="input-field w-full"
+                                placeholder="Min. 6 characters"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -104,31 +104,33 @@ export default function RegisterPage() {
                     </div>
 
                     {error && (
-                        <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg border border-red-100">
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            className="text-red-600 text-sm font-medium text-center bg-red-50 p-3 rounded-xl border border-red-100"
+                        >
                             {error}
-                        </div>
+                        </motion.div>
                     )}
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shadow-lg shadow-blue-200"
-                        >
-                            {loading ? "Creating account..." : "Sign up"}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full btn-primary"
+                    >
+                        {loading ? "Creating..." : "Create Account"}
+                    </button>
 
-                    <div className="text-sm text-center">
+                    <div className="text-center mt-6">
                         <Link
                             href="/login"
-                            className="font-medium text-blue-600 hover:text-blue-500"
+                            className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
                         >
-                            Already have an account? Sign in
+                            Already have an account? <span className="text-blue-600 hover:underline">Log In</span>
                         </Link>
                     </div>
                 </form>
-            </div>
+            </motion.div>
         </div>
     );
 }

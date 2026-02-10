@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import KnowledgeList from "./knowledgeList";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 type KnowledgeItem = {
   _id: string;
@@ -64,45 +65,53 @@ export default function DashboardPage() {
   if (authLoading || (!user && loading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!user) return null; // Should redirect
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <div className="max-w-7xl mx-auto py-12 px-6">
-        <div className="mb-12 flex items-end justify-between">
-          <div>
-            <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {user.name}'s Brain
-            </h1>
-            <p className="text-xl text-slate-600">
-              Explore your collection of knowledge, insights, and saved links
-            </p>
-          </div>
-          <button
-            onClick={() => router.push('/capture')}
-            className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium shadow-lg shadow-blue-200 transition-all hover:-translate-y-1"
+    <div className="min-h-screen pt-32 pb-20 bg-slate-50">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            + Capture New
-          </button>
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+              {user.name}'s Library
+            </h1>
+            <p className="text-xl text-slate-500 font-medium max-w-lg">
+              Your personal knowledge collection.
+            </p>
+          </motion.div>
+
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            onClick={() => router.push('/capture')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:-translate-y-1 transition-all active:scale-95 flex items-center gap-2 group"
+          >
+            <span className="text-lg">＋</span>
+            <span>Capture New</span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">→</span>
+          </motion.button>
         </div>
 
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
-            <p className="mt-4 text-slate-600">Loading your knowledge...</p>
+          <div className="py-20 text-center">
+            <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-400 font-medium">Loading contents...</p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">{error}</p>
+          <div className="bg-red-50 border border-red-100 rounded-xl p-6 mb-10 text-red-800 font-medium">
+            {error}
           </div>
         )}
 

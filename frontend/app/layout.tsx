@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Second Brain - AI-Powered Knowledge Management",
-  description: "Capture, organize, and intelligently surface your knowledge with AI",
+  title: "Second Brain | AI-Powered Knowledge",
+  description: "Capture, organize, and intelligently surface your knowledge with AI.",
 };
 
 export default function RootLayout({
@@ -28,12 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900`}
       >
         <AuthProvider>
           <SmoothScroll>
             <Navigation />
-            {children}
+            <div className="relative z-10">
+              {children}
+            </div>
           </SmoothScroll>
         </AuthProvider>
       </body>

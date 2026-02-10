@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
@@ -60,174 +60,124 @@ export default function CapturePage() {
       setSuccess(true);
       setForm({ title: "", content: "", type: "note", tags: "" });
 
-      // Auto-hide success message after 5 seconds
       setTimeout(() => setSuccess(false), 5000);
     } catch (error) {
       console.error("Error saving knowledge:", error);
-      setError("Failed to save knowledge. Please try again.");
+      setError("Failed to save. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
   if (authLoading || (!user && loading)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
   }
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12">
-      <div className="max-w-3xl mx-auto px-6">
+    <div className="min-h-screen py-32 px-6 bg-slate-50">
+      <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-slate-900">
-            Capture Knowledge
-          </h1>
-          <p className="text-xl text-slate-600 mb-8">
-            Save your thoughts, links, and insights. AI will process them
-            automatically.
-          </p>
+          <div className="mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+              Capture.
+            </h1>
+            <p className="text-xl text-slate-500 font-medium">
+              Store it now. Let AI connect to it later.
+            </p>
+          </div>
 
           <motion.form
             onSubmit={handleSubmit}
-            className="bg-white rounded-2xl shadow-xl p-8 space-y-6"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 space-y-8 relative overflow-hidden border border-slate-100"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Title *
-              </label>
-              <input
-                name="title"
-                aria-label="Title"
-                placeholder="Give your knowledge a title..."
-                value={form.title}
-                onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none"
-                required
-              />
-            </div>
+            <div className="space-y-6">
+              <div>
+                <input
+                  name="title"
+                  placeholder="Untitled Idea..."
+                  value={form.title}
+                  onChange={handleChange}
+                  className="w-full bg-transparent text-3xl md:text-4xl font-bold text-slate-900 placeholder:text-slate-300 outline-none border-b-2 border-slate-100 focus:border-blue-500 transition-colors pb-4"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Content *
-              </label>
-              <textarea
-                name="content"
-                aria-label="Content"
-                placeholder="Write your thought, paste a link, or capture an insight..."
-                value={form.content}
-                onChange={handleChange}
-                rows={8}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none resize-none"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Type
-              </label>
-              <select
-                name="type"
-                value={form.type}
-                onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none appearance-none"
-              >
-                <option value="note">📝 Note</option>
-                <option value="link">🔗 Link</option>
-                <option value="insight">💡 Insight</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Tags
-              </label>
-              <input
-                name="tags"
-                placeholder="productivity, learning, ideas (comma separated)"
-                value={form.tags}
-                onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 outline-none"
-              />
-              <p className="text-xs text-slate-500 mt-2">
-                AI will automatically add more relevant tags
-              </p>
-            </div>
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: loading ? 1 : 1.02 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Saving...
-                </span>
-              ) : (
-                "💾 Save Knowledge"
-              )}
-            </motion.button>
-
-            {success && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3"
-              >
-                <span className="text-2xl">✅</span>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-green-800 font-semibold">
-                    Knowledge saved successfully!
-                  </p>
-                  <p className="text-green-600 text-sm">
-                    AI is processing in the background to summarize and tag your
-                    content.
-                  </p>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Type</label>
+                  <div className="relative">
+                    <select
+                      name="type"
+                      value={form.type}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50 rounded-xl px-4 py-3 font-semibold text-slate-700 appearance-none cursor-pointer hover:bg-slate-100 transition-colors outline-none border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                    >
+                      <option value="note">Note</option>
+                      <option value="link">Link</option>
+                      <option value="insight">Insight</option>
+                    </select>
+                    <span className="absolute right-4 top-3.5 pointer-events-none text-slate-400">▼</span>
+                  </div>
                 </div>
-              </motion.div>
-            )}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Tags</label>
+                  <input
+                    name="tags"
+                    placeholder="tech, future, design"
+                    value={form.tags}
+                    onChange={handleChange}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all"
+                  />
+                </div>
+              </div>
 
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-center gap-3"
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Content</label>
+                <textarea
+                  name="content"
+                  placeholder="What's on your mind?"
+                  value={form.content}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 text-lg text-slate-700 placeholder:text-slate-300 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all resize-none font-medium leading-relaxed"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4">
+              <AnimatePresence>
+                {success && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-green-600 font-bold flex items-center gap-2"
+                  >
+                    <span>✓</span> Saved to archive
+                  </motion.span>
+                )}
+              </AnimatePresence>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="text-2xl">❌</span>
-                <p className="text-red-800">{error}</p>
-              </motion.div>
-            )}
+                {loading ? "Saving..." : "Save Artifact"}
+              </button>
+            </div>
+
+            {error && <p className="text-red-600 font-bold text-center bg-red-50 p-2 rounded-lg border border-red-100">{error}</p>}
           </motion.form>
         </motion.div>
       </div>
