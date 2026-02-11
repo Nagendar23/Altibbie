@@ -9,7 +9,7 @@ const app = express();
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
   .split(',')
-  .map(origin => origin.trim());
+  .map(origin => origin.trim().replace(/\/$/, ""));
 
 // CORS configuration
 const corsOptions = {
