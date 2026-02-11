@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 export const protect = async (req, res, next) => {
+    console.log('Cookies received:', req.cookies); // Debugging 401
     let token;
 
     if (

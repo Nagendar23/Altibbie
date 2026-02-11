@@ -7,6 +7,9 @@ import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
+// Trust the reverse proxy (Render/Vercel) so that secure cookies work
+app.set('trust proxy', 1);
+
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
   .split(',')
   .map(origin => origin.trim().replace(/\/$/, ""));
