@@ -34,7 +34,7 @@ export default function RegisterPage() {
                 throw new Error(data.error || "Registration failed");
             }
 
-            await register(data.user);
+            await register(data.user, data.token);
         } catch (err: any) {
             setError(err.message);
         } finally {

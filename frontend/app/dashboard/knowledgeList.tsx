@@ -52,7 +52,12 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
 
     setDeletingId(id);
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge/${id}`, {
+        headers,
         method: 'DELETE',
         credentials: 'include'
       });
@@ -135,8 +140,8 @@ export default function KnowledgeList({ items = [] }: KnowledgeListProps) {
                 key={t}
                 onClick={() => setType(t)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all whitespace-nowrap ${type === t
-                    ? "bg-slate-900 text-white shadow-md"
-                    : "bg-slate-100 text-slate-500 hover:bg-white hover:text-slate-900"
+                  ? "bg-slate-900 text-white shadow-md"
+                  : "bg-slate-100 text-slate-500 hover:bg-white hover:text-slate-900"
                   }`}
               >
                 {t}

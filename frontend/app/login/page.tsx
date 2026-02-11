@@ -33,7 +33,7 @@ export default function LoginPage() {
                 throw new Error(data.error || "Login failed");
             }
 
-            await login(data.user);
+            await login(data.user, data.token);
         } catch (err: any) {
             setError(err.message);
         } finally {

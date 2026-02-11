@@ -43,11 +43,15 @@ export default function QueryPage() {
     setResult(null);
 
     try {
+      const token = localStorage.getItem('token');
+      const headers: any = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge/query`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
           body: JSON.stringify({ question }),
         }

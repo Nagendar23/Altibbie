@@ -17,21 +17,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const checkUserLoggedIn = async () => {
-        // Check if token exists in cookies (set by backend or frontend)
-        // Since we're using httpOnly cookie for security primarily, we might need a /me endpoint that checks the cookie
-        // But for this simple implementation, let's try to hit /me
-
         try {
-            // If we have a token in localStorage (optional hybrid approach) or just rely on cookie
-            // Let's rely on the cookie being there.
+            const token = localStorage.getItem('token');
+            const headers: any = {
+                'Content-Type': 'application/json',
+            };
+
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Authorization header might be needed if we aren't using cookies for this specific call or if using Bearer
-                    // But our backend checks both. Let's start with just credentials: include
-                },
-                credentials: 'include' // Important for cookies
+                headers,
+                credentials: 'include'
             });
 
             if (res.ok) {
@@ -39,6 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(data.data);
             } else {
                 setUser(null);
+                if (res.status === 401) localStorage.removeItem('token'); // Clear invalid token
             }
         } catch (error) {
             console.error("Auth check failed", error);
@@ -49,23 +49,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     // Login
-    const login = async (user: any) => {
+    const login = async (user: any, token: string) => {
+        if (token) {
+            localStorage.setItem('token', token);
+        }
         setUser(user);
         router.push("/dashboard");
     };
 
     // Register
-    const register = async (user: any) => {
+    const register = async (user: any, token: string) => {
+        if (token) {
+            localStorage.setItem('token', token);
+        }
         setUser(user);
         router.push("/dashboard");
     };
 
     // Logout
     const logout = async () => {
-        // Call logout endpoint if exists, or just clear local state and redirect
-        // For now, simple state clear. In real app, hit /api/auth/logout to clear cookie
         setUser(null);
-        Cookies.remove("token"); // If we were setting it client side too
+        Cookies.remove("token");
+        localStorage.removeItem("token");
         router.push("/login");
     };
 

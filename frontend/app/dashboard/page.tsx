@@ -37,9 +37,19 @@ export default function DashboardPage() {
     const fetchKnowledge = async () => {
       try {
         setLoading(true);
+        const token = localStorage.getItem('token');
+        const headers: any = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/knowledge`,
-          { cache: "no-store", credentials: "include" }
+          {
+            cache: "no-store",
+            credentials: "include",
+            headers
+          }
         );
 
         if (!res.ok) {
