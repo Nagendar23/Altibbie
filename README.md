@@ -2,6 +2,11 @@
 
 ![Second Brain](https://img.shields.io/badge/AI-Powered-blue) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![React](https://img.shields.io/badge/React-19-61dafb) ![Node.js](https://img.shields.io/badge/Node.js-Express-green)
 
+# 🌐Live URL's
+
+Frontend: https://altibbie.vercel.app
+Backend: https://altibbie.onrender.com  
+
 > **Transform scattered thoughts into structured intelligence.** A sophisticated "Second Brain" application that captures, organizes, and intelligently surfaces knowledge using AI.
 
 ## 🌟 Features
